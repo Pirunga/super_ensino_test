@@ -1,0 +1,26 @@
+version: "3.7"
+services:
+  db:
+    image: postgres
+    env_file: envs/dev.env
+    ports:
+      - 5432:5432
+    volumes:
+      - super_ensino:/var/lib/postgresql/data
+
+  web:
+    build: .
+    env_file: envs/dev.env
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; python manage.py runserver 0.0.0.0:8000'
+    stdin_open: true
+    volumes:
+      - .:/super_ensino
+    tty: true
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+
+volumes:
+  super_ensino:
+    external: true
