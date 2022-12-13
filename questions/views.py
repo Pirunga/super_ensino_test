@@ -25,10 +25,9 @@ class QuestionsView(ListAPIView, RetrieveAPIView):
 
     def get_queryset(self):
         queryset = self.queryset.all()
+        user = get_object_or_404(User, pk=self.request.headers.get('user-id'))
 
         for question in queryset:
-            user = User.objects.get(id=self.request.headers.get('user-id'))
-
             if user_mark := UserMark.objects.filter(question=question, user=user).first():
                 question.user_mark_id = UserMarkSerializer(user_mark).data
 
@@ -102,7 +101,7 @@ class UserView(RetrieveAPIView):
 
     def get_queryset(self):
         queryset = self.queryset.all()
-        user = User.objects.get(id=self.request.headers.get('user-id'))
+        user = get_object_or_404(User, pk=self.request.headers.get('user-id'))
 
         if questions_length := Questions.objects.all().count():
             perfomace_index = trunc(user.correct_answers / questions_length)
