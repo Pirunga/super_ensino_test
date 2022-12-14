@@ -55,7 +55,7 @@ class UserMarkView(CreateAPIView):
         question = get_object_or_404(Questions, pk=question_id)
         user = get_object_or_404(User, pk=user_id)
         
-        if UserMark.objects.filter(question=question, user=user):
+        if UserMark.objects.filter(question=question, user=user).first():
             return Response(
                 {'message': 'You Already have answered this question'},
                 HTTP_409_CONFLICT
@@ -106,14 +106,35 @@ class UserView(RetrieveAPIView):
     """
     queryset = User.objects.all()
     serializer_class = UserPerfomaceSerializer
+    
+    def get_object(self):
+        """
+        Returns the object the view is displaying.
 
-    def get_queryset(self):
-        queryset = self.queryset.all()
-        user = get_object_or_404(User, pk=self.request.headers.get('user-id'))
+        You may want to override this if you need to provide non-standard
+        queryset lookups.  Eg if objects are referenced using multiple
+        keyword arguments in the url conf.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Perform the lookup filtering.
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+        assert lookup_url_kwarg in self.kwargs, (
+            'Expected view %s to be called with a URL keyword argument '
+            'named "%s". Fix your URL conf, or set the `.lookup_field` '
+            'attribute on the view correctly.' %
+            (self.__class__.__name__, lookup_url_kwarg)
+        )
+
+        obj = get_object_or_404(queryset, pk=self.request.headers.get('user-id'))
 
         if questions_length := Questions.objects.all().count():
-            perfomace_index = trunc(user.correct_answers / questions_length)
-            user.perfomace_index = str(100 * perfomace_index) + '%'
-            user.save()
-        
-        return queryset
+            perfomace_index = trunc(obj.correct_answers / questions_length)
+            obj.perfomace_index = str(100 * perfomace_index) + '%'
+            obj.save()
+
+        # May raise a permission denied
+        self.check_object_permissions(self.request, obj)
+
+        return obj
