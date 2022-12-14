@@ -2,7 +2,11 @@ from django.shortcuts import render
 from math import trunc
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from rest_framework.status import HTTP_201_CREATED, HTTP_409_CONFLICT
+from rest_framework.status import (
+    HTTP_201_CREATED,
+    HTTP_404_NOT_FOUND,
+    HTTP_409_CONFLICT
+)
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
@@ -25,8 +29,9 @@ class QuestionsView(ListAPIView, RetrieveAPIView):
 
     def get_queryset(self):
         queryset = self.queryset.all()
+
         if question_id := self.request.parser_context.get('kwargs').get('question_id'):
-            queryset = [self.queryset.filter(id=question_id).first()]
+            queryset = [get_object_or_404(self.queryset, pk=question_id)]
 
         user = get_object_or_404(User, pk=self.request.headers.get('user-id'))
 
