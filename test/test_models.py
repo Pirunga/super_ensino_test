@@ -31,15 +31,15 @@ class QuestionsModelTest(TestCase):
 class UserModelTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = User.objects.create(
-                email='kirito@sao.com',
-                username='kirito',
+        cls.user = User.objects.create_superuser(
+                email='kirito2@sao.com',
+                username='kirito2',
                 password='sao'
         )
 
     def test_information_fields(self) -> None:
         self.assertIsInstance(self.user.username, str)
-        self.assertIsInstance(self.user.emal, str)
+        self.assertIsInstance(self.user.email, str)
         self.assertIsInstance(self.user.password, str)
 
 
@@ -49,8 +49,8 @@ class UserMarkModelTest(TestCase):
         cls.user_mark = UserMark.objects.create(
             user_mark='A',
             user=User.objects.create(
-                email='kirito@sao.com',
-                username='kirito',
+                email='kirito3@sao.com',
+                username='kirito3',
                 password='sao'
             ),
             question=Questions.objects.create(
@@ -60,7 +60,7 @@ class UserMarkModelTest(TestCase):
                 alternative_c='Algo inexplicável',
                 alternative_d='Eu vou lá saber?',
                 correct_alternative='A',
-                created_by=User.objects.create(
+                created_by=User.objects.create_superuser(
                     email='kirito@sao.com',
                     username='kirito',
                     password='sao'
