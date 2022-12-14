@@ -25,6 +25,9 @@ class QuestionsView(ListAPIView, RetrieveAPIView):
 
     def get_queryset(self):
         queryset = self.queryset.all()
+        if question_id := self.request.parser_context.get('kwargs').get('question_id'):
+            queryset = [self.queryset.filter(id=question_id).first()]
+
         user = get_object_or_404(User, pk=self.request.headers.get('user-id'))
 
         for question in queryset:
