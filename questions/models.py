@@ -1,6 +1,5 @@
 from django.db.models import (
     CharField,
-    FloatField,
     ForeignKey,
     IntegerField,
     Model,
